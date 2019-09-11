@@ -67,6 +67,9 @@ unit JsonDataObjects;
   {$UNDEF ASMSUPPORT}
 {$ENDIF EXTERNALLINKER}
 
+// Enable relaxed JSON parsing, such as dangling comma in object properties and arrays
+{$DEFINE RELAXED_PARSER}
+
 // Enables the progress callback feature
 {$DEFINE SUPPORT_PROGRESS}
 
@@ -1987,6 +1990,10 @@ begin
   begin
     while FLook.Kind <> jtkEof do
     begin
+      {$IFDEF RELAXED_PARSER}
+      if FLook.Kind = jtkRBrace then
+        Break;
+      {$ENDIF RELAXED_PARSER}
       ParseObjectProperty(Data);
       if FLook.Kind = jtkRBrace then
         Break;
@@ -2095,6 +2102,10 @@ begin
   begin
     while FLook.Kind <> jtkEof do
     begin
+      {$IFDEF RELAXED_PARSER}
+      if FLook.Kind = jtkRBracket then
+        Break;
+      {$ENDIF RELAXED_PARSER}
       ParseArrayPropertyValue(Data);
       if FLook.Kind = jtkRBracket then
         Break;

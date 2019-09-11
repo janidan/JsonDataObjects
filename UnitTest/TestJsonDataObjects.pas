@@ -84,6 +84,7 @@ type
     procedure TestInsert;
     procedure TestExtract;
     procedure TestEnumerator;
+    procedure TestParseEmptyArrayWithDanglingComma;
   end;
 
   TestTJsonObject = class(TTestCase)
@@ -113,6 +114,7 @@ type
     procedure TestPathAccess;
     procedure TestExtract;
     procedure TestEnumerator;
+    procedure TestParseObjectPropertyWithDanglingComma;
   end;
 
 implementation
@@ -1884,6 +1886,22 @@ begin
   end;
 end;
 
+procedure TestTJsonArray.TestParseEmptyArrayWithDanglingComma;
+var
+  A: TJsonArray;
+begin
+  A := TJsonArray.Create;
+  try
+    A.FromUtf8JSON('[1,]');
+    CheckEquals(1, A.Count);
+
+    A.FromJSON('[1,]');
+    CheckEquals(1, A.Count);
+  finally
+    A.Free;
+  end;
+end;
+
 procedure TestTJsonArray.TestExtract;
 var
   A, HelloA: TJsonArray;
@@ -2491,6 +2509,21 @@ procedure TestTJsonObject.TestPathError4;
 begin
   FJson.FromJSON('{"First":{"Second":{"Third":{"Value":"Hello"}}}}');
   FJson.Path['.Second'];
+end;
+
+procedure TestTJsonObject.TestParseObjectPropertyWithDanglingComma;
+var
+  O: TJsonObject;
+begin
+  O := TJsonObject.Create;
+  try
+    O.FromJSON('{"First":"one",' +
+               ' "Second":"two",' +
+               ' "Third":"three", }'); // Dangling Comma
+    CheckEquals(3, O.Count);
+  finally
+    O.Free;
+  end;
 end;
 
 procedure TestTJsonObject.TestPathAccess;
